@@ -17,7 +17,7 @@ typedef struct Snake t_snake;
 
 #define GAMEGRID_X 40
 #define GAMEGRID_Y 20
-#define MOVE_PERIOD 0.001 /* In seconds. */
+#define MOVE_PERIOD 1200 /* In miliseconds. */
 #define FOOD_NUM 3
 
 /*Colors:*/

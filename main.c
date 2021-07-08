@@ -1,6 +1,6 @@
 #include "csnake.h"
+#include <bits/time.h>
 #include <curses.h>
-#include <stdio.h>
 #include <time.h>
 
 enum DIRECTIONS {FORWARD,BACK,LEFT,RIGHT} direction = FORWARD;
@@ -13,6 +13,7 @@ struct Food foodList[FOOD_NUM];
 int score,foodRemaining;
 
 void doGameTick(enum DIRECTIONS direction);
+double timetomili(struct timespec *times);
 
 int main(void){
   int ch;
@@ -46,9 +47,11 @@ int main(void){
   generateFood(foodList,FOOD_NUM);
   foodRemaining = FOOD_NUM;
 
-  time_t lastTime,currTime;
+  struct timespec lastTime,currTime;
   double dtime;
-  lastTime = time(NULL);
+  // Temporary timespec as i need to pass an instance, not an uninstansiated
+  // pointer to this!
+  clock_gettime(CLOCK_MONOTONIC,&lastTime);
   /* Game Loop! */
   while ((ch=getch()) != KEY_QUIT){
     /* Process Input */
@@ -71,17 +74,19 @@ int main(void){
         direction = RIGHT;
         break;
       }
-
-    /* Do stuff every MOVE_PERIOD */
-    currTime = time(NULL);
+  /* Do stuff every MOVE_PERIOD */
+    clock_gettime(CLOCK_MONOTONIC,&currTime);
     char text4[150];
-    if ((dtime = difftime(currTime,lastTime)) >= MOVE_PERIOD){
-        /*Update lastTime */
-        lastTime = currTime;
-        doGameTick(direction);
-        sprintf(text4,"Time: %2.5f",dtime);
-        debugText(text4,3);
+    if ((dtime = timetomili(&currTime)- timetomili(&lastTime)) >= MOVE_PERIOD){
+        /*Update lastTime - I could do this with pointers if i knew how to use them!
+         * It seems here that i would need an infinite number of new variables to point to, which is annoying!
+         */
+      clock_gettime(CLOCK_MONOTONIC,&lastTime);
+      doGameTick(direction);
+
     }
+    sprintf(text4, "Time: %4.2f", dtime);
+    debugText(text4, 3);
   }
   endwin();
   return 0;
@@ -127,4 +132,9 @@ void doGameTick(enum DIRECTIONS direction) {
   drawSnake(&snake);
   drawFood(foodList,FOOD_NUM);
   wrefresh(gameWindow);
+}
+
+
+double timetomili(struct timespec *timesp){
+  return (timesp->tv_sec)*1000 + (double) (timesp->tv_nsec)/1000000; 
 }
