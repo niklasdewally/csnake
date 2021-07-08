@@ -10,22 +10,20 @@ struct Food {
 };
 
 #define MAX_SNAKE_LENGTH 20
-
 struct Snake {
   int x[MAX_SNAKE_LENGTH];
   int y[MAX_SNAKE_LENGTH];
   int length;
-  
 };
+
 typedef struct Snake t_snake;
 
 #define GAMEGRID_X 40
 #define GAMEGRID_Y 20
 #define MOVE_PERIOD 200 /* In miliseconds. */
 #define FOOD_NUM 3
-#define EXTENSION_PER_FOOD 4
 
-/*Colors:*/
+/* colors */
 #define C_SNAKE 1
 #define C_SNAKE_FG COLOR_BLACK
 #define C_SNAKE_BG COLOR_BLUE
@@ -43,12 +41,14 @@ typedef struct Snake t_snake;
 #define C_DEBUG_FG COLOR_BLACK
 #define C_DEBUG_BG COLOR_RED
 
-#define CHTYPE_OUTER ('X' | A_UNDERLINE| COLOR_PAIR(C_OUTER))
-/* Keybindings */
-#define KEY_QUIT 'q'
+/* keybindings */
+#define K_QUIT 'q'
+#define K_RESTART 'r'
+
 /* variables */
 extern WINDOW *gameWindow;
 extern WINDOW *debugWindow;
+
 /* draw functions */
 WINDOW *createGameWindow(void);
 WINDOW *createDebugWindow(void);

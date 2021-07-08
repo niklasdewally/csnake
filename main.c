@@ -3,13 +3,12 @@
 #include <curses.h>
 #include <time.h>
 
-enum DIRECTIONS direction = NONE;
-WINDOW *gameWindow;
-WINDOW *debugWindow;
+enum DIRECTIONS direction;
+WINDOW *gameWindow,*debugWindow;
 
 t_snake snake;
 struct Food foodList[FOOD_NUM];
-int score,foodRemaining;
+int score,foodRemaining,gameEnded;
 
 void initGame(void);
 void doGameTick(enum DIRECTIONS direction);
@@ -45,7 +44,7 @@ int main(void){
   double dtime;
   clock_gettime(CLOCK_MONOTONIC,&lastTime);
   /* Game Loop! */
-  while ((ch=getch()) != KEY_QUIT){
+  while ((ch=getch()) != K_QUIT){
     /* Process Input */
     switch (ch)
       {
@@ -73,32 +72,36 @@ int main(void){
         direction = RIGHT;
         }
         break;
+      case K_RESTART:
+        // RESTART CODE
+        initGame();
       }
   /* Do stuff every MOVE_PERIOD */
     clock_gettime(CLOCK_MONOTONIC,&currTime);
     char text4[150];
-    if ((dtime = timetomili(&currTime)- timetomili(&lastTime)) >= MOVE_PERIOD){
-        /*Update lastTime - I could do this with pointers if i knew how to use them!
-         * It seems here that i would need an infinite number of new variables to point to, which is annoying!
-         */
+    if ((dtime = timetomili(&currTime)- timetomili(&lastTime)) >= MOVE_PERIOD && !gameEnded){
+      /*Update lastTime - I could do this with pointers if i knew how to use them!
+       * It seems here that i would need an infinite number of new variables to point to, which is annoying!
+       */
       clock_gettime(CLOCK_MONOTONIC,&lastTime);
       doGameTick(direction);
       sprintf(text4, "Last Tick Time: %4.2f", dtime);
       debugText(text4, 3);
     }
-
   }
   endwin();
   return 0;
 }
 
 void initGame(void){
+  gameEnded = FALSE;
   score = 0;
   snake.x[0] = 1;
   snake.y[0] = 1;
   snake.length = 1;
   generateFood(foodList, FOOD_NUM);
   foodRemaining = FOOD_NUM;
+  direction = NONE;
 }
 
 void doGameTick(enum DIRECTIONS direction) {
@@ -106,7 +109,6 @@ void doGameTick(enum DIRECTIONS direction) {
   resolveDirections(direction,&dx,&dy);
 
   moveSnake(&snake,dx,dy);
-  
   checkFoodCollisions(foodList,FOOD_NUM,&snake,&score,&foodRemaining,direction);
   if (foodRemaining==0){
     generateFood(foodList,FOOD_NUM);
@@ -115,7 +117,7 @@ void doGameTick(enum DIRECTIONS direction) {
 
   if (isSelfCollision(&snake)){
     // Game Over
-    initGame();
+    gameEnded = TRUE;
      return;
   }
 
