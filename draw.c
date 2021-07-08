@@ -12,7 +12,6 @@ WINDOW *createGameWindow (void) {
   startx = (COLS - width)/2;
 
   localWindow = newwin(height,width,starty,startx);
-  box(localWindow,0,0); /*Create a border with default characters*/
   wrefresh(localWindow); /*Show the border*/
   return localWindow;
 }

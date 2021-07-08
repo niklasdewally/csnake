@@ -115,7 +115,7 @@ void doGameTick(enum DIRECTIONS direction) {
     foodRemaining = FOOD_NUM;
   }
 
-  if (isSelfCollision(&snake)){
+  if (isSelfCollision(&snake) || isWallCollision(&snake)){
     // Game Over
     gameEnded = TRUE;
      return;
@@ -138,6 +138,6 @@ void doGameTick(enum DIRECTIONS direction) {
 
 
 double timetomili(struct timespec *timesp){
-  return (timesp->tv_sec)*1000 + (double) (timesp->tv_nsec)/1000000; 
+  return (timesp->tv_sec)*1000 + (double) (timesp->tv_nsec)/1000000;
 }
 

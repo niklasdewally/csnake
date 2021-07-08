@@ -44,6 +44,13 @@ int isSelfCollision(t_snake *snake) {
   return 0;
 }
 
+int isWallCollision(t_snake *snake){
+  if (snake->x[0] < 0 || snake->x[0] >= GAMEGRID_X || snake->y[0] < 0 || snake->y[0] >= GAMEGRID_Y ){
+    return 1;
+  }
+  return 0;
+}
+
 void moveSnake(t_snake *snake,int dx,int dy){
   /* Copying the entire array is a dumb implementation, but i'm dumb */
   int ax[MAX_SNAKE_LENGTH],ay[MAX_SNAKE_LENGTH];

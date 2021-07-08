@@ -60,6 +60,7 @@ void debugText(const char text[], int y);
 void generateFood(struct Food foodList[],int foodNum);
 void checkFoodCollisions(struct Food foodList[], int foodNum, t_snake *snake, int *score,int *foodRemaining, enum DIRECTIONS direction);
 int isSelfCollision(t_snake *snake);
+int isWallCollision(t_snake *snake);
 void moveSnake(t_snake *snake, int dx, int dy);
 void resolveDirections(enum DIRECTIONS direction,int *dx, int *dy);
 
