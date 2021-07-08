@@ -26,7 +26,10 @@ WINDOW *createDebugWindow (void){
 
 void drawSnake(t_snake *snake){
   wattron(gameWindow,COLOR_PAIR(C_SNAKE));
-  mvwaddch(gameWindow,snake->y,snake->x,'0');
+  mvwaddch(gameWindow, snake->y[0], snake->x[0],'x');
+  for (int i = 1; i < snake->length; i++) {
+    mvwaddch(gameWindow,snake->y[i],snake->x[i],'0');
+  }
   wattroff(gameWindow,COLOR_PAIR(C_SNAKE));
   }
 

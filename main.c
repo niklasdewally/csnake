@@ -3,8 +3,7 @@
 #include <curses.h>
 #include <time.h>
 
-enum DIRECTIONS {FORWARD,BACK,LEFT,RIGHT} direction = FORWARD;
-
+enum DIRECTIONS direction = NONE;
 WINDOW *gameWindow;
 WINDOW *debugWindow;
 
@@ -12,6 +11,7 @@ t_snake snake;
 struct Food foodList[FOOD_NUM];
 int score,foodRemaining;
 
+void initGame(void);
 void doGameTick(enum DIRECTIONS direction);
 double timetomili(struct timespec *times);
 
@@ -20,7 +20,7 @@ int main(void){
   WINDOW *parentWindow = initscr();
 
   start_color();
-  init_pair(C_SNAKE,C_SNAKE_COLOR,C_SNAKE_COLOR);
+  init_pair(C_SNAKE,C_SNAKE_FG,C_SNAKE_BG);
   init_pair(C_FOOD,C_FOOD_COLOR,C_FOOD_COLOR);
   init_pair(C_OUTER,C_OUTER_COLOR,C_OUTER_COLOR);
   init_pair(C_INNERBG,C_INNERBG_COLOR,C_INNERBG_COLOR);
@@ -39,18 +39,10 @@ int main(void){
   debugWindow = createDebugWindow();
   wbkgd(gameWindow,COLOR_PAIR(C_INNERBG));
 
-  /* == GAME VARIABLES ==  */
-  score = 0;
-  snake.x = 1;
-  snake.y = 1;
-  snake.length = 1;
-  generateFood(foodList,FOOD_NUM);
-  foodRemaining = FOOD_NUM;
+  initGame();
 
   struct timespec lastTime,currTime;
   double dtime;
-  // Temporary timespec as i need to pass an instance, not an uninstansiated
-  // pointer to this!
   clock_gettime(CLOCK_MONOTONIC,&lastTime);
   /* Game Loop! */
   while ((ch=getch()) != KEY_QUIT){
@@ -62,16 +54,24 @@ int main(void){
       case ERR: /* No input! */
         break;
       case 'w':
-        direction = FORWARD;
+        if (direction != BACK){
+          direction = FORWARD;
+        }
         break;
       case 's':
-        direction = BACK;
+        if (direction != FORWARD){
+          direction = BACK;
+        }
         break;
       case 'a':
-        direction = LEFT;
+        if (direction != RIGHT){
+          direction = LEFT;
+        }
         break;
       case 'd':
+        if (direction != LEFT){
         direction = RIGHT;
+        }
         break;
       }
   /* Do stuff every MOVE_PERIOD */
@@ -83,41 +83,41 @@ int main(void){
          */
       clock_gettime(CLOCK_MONOTONIC,&lastTime);
       doGameTick(direction);
-
+      sprintf(text4, "Last Tick Time: %4.2f", dtime);
+      debugText(text4, 3);
     }
-    sprintf(text4, "Time: %4.2f", dtime);
-    debugText(text4, 3);
+
   }
   endwin();
   return 0;
 }
 
+void initGame(void){
+  score = 0;
+  snake.x[0] = 1;
+  snake.y[0] = 1;
+  snake.length = 1;
+  generateFood(foodList, FOOD_NUM);
+  foodRemaining = FOOD_NUM;
+}
+
 void doGameTick(enum DIRECTIONS direction) {
   int dx,dy;
-  dx = 0;
-  dy = 0;
-  switch (direction)
-    {
-    case FORWARD:
-      dy = -1;
-      break;
-    case BACK:
-      dy = 1;
-      break;
-    case LEFT:
-      dx=-1;
-      break;
-    case RIGHT:
-      dx=1;
-      break;
-  }
+  resolveDirections(direction,&dx,&dy);
+
   moveSnake(&snake,dx,dy);
-  checkFoodCollisions(foodList,FOOD_NUM,&snake,&score,&foodRemaining);
+  
+  checkFoodCollisions(foodList,FOOD_NUM,&snake,&score,&foodRemaining,direction);
   if (foodRemaining==0){
     generateFood(foodList,FOOD_NUM);
     foodRemaining = FOOD_NUM;
   }
-  checkSelfCollisions(&snake);
+
+  if (isSelfCollision(&snake)){
+    // Game Over
+    initGame();
+     return;
+  }
 
   /* == DRAWING ==  */
   char text1[20],text2[20],text3[150];
@@ -138,3 +138,4 @@ void doGameTick(enum DIRECTIONS direction) {
 double timetomili(struct timespec *timesp){
   return (timesp->tv_sec)*1000 + (double) (timesp->tv_nsec)/1000000; 
 }
+

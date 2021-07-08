@@ -1,28 +1,34 @@
 #include <ncurses.h>
 
 /* types */
+enum DIRECTIONS { NONE, FORWARD, BACK, LEFT, RIGHT };
+
 struct Food {
   int x;
   int y;
   int visible;
 };
 
+#define MAX_SNAKE_LENGTH 20
+
 struct Snake {
-  int x;
-  int y;
+  int x[MAX_SNAKE_LENGTH];
+  int y[MAX_SNAKE_LENGTH];
   int length;
-  // TODO: make snake longer.
+  
 };
 typedef struct Snake t_snake;
 
 #define GAMEGRID_X 40
 #define GAMEGRID_Y 20
-#define MOVE_PERIOD 1200 /* In miliseconds. */
+#define MOVE_PERIOD 200 /* In miliseconds. */
 #define FOOD_NUM 3
+#define EXTENSION_PER_FOOD 4
 
 /*Colors:*/
 #define C_SNAKE 1
-#define C_SNAKE_COLOR COLOR_BLUE
+#define C_SNAKE_FG COLOR_BLACK
+#define C_SNAKE_BG COLOR_BLUE
 
 #define C_FOOD 2
 #define C_FOOD_COLOR COLOR_GREEN
@@ -40,8 +46,7 @@ typedef struct Snake t_snake;
 #define CHTYPE_OUTER ('X' | A_UNDERLINE| COLOR_PAIR(C_OUTER))
 /* Keybindings */
 #define KEY_QUIT 'q'
-
-/* global variables */
+/* variables */
 extern WINDOW *gameWindow;
 extern WINDOW *debugWindow;
 /* draw functions */
@@ -53,8 +58,9 @@ void debugText(const char text[], int y);
 
 /* game logic functions */
 void generateFood(struct Food foodList[],int foodNum);
-void checkFoodCollisions(struct Food foodList[], int foodNum, t_snake *snake, int *score,int *foodRemaining);
-void checkSelfCollisions(t_snake *snake);
+void checkFoodCollisions(struct Food foodList[], int foodNum, t_snake *snake, int *score,int *foodRemaining, enum DIRECTIONS direction);
+int isSelfCollision(t_snake *snake);
 void moveSnake(t_snake *snake, int dx, int dy);
+void resolveDirections(enum DIRECTIONS direction,int *dx, int *dy);
 
 
